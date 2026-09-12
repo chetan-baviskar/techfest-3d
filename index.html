@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TECHFEST 3D — Enter The Future</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#02030a;
+    color:white;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow-x:hidden;
+}
+
+/* =====================================================
+   3D CANVAS
+===================================================== */
+
+#canvas-container{
+    position:fixed;
+    inset:0;
+    z-index:-10;
+}
+
+canvas{
+    display:block;
+}
+
+.overlay{
+    position:fixed;
+    inset:0;
+    z-index:-5;
+    pointer-events:none;
+
+    background:
+    radial-gradient(
+        circle at center,
+        transparent 10%,
+        rgba(2,3,10,.35) 55%,
+        rgba(2,3,10,.9) 100%
+    );
+}
+
+/* =====================================================
+   CURSOR GLOW
+===================================================== */
+
+.cursor-glow{
+    position:fixed;
+    width:250px;
+    height:250px;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:999;
+
+    background:radial-gradient(
+        circle,
+        rgba(0,255,255,.12),
+        transparent 70%
+    );
+
+    transform:translate(-50%,-50%);
+}
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+nav{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:100;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:22px 7%;
+
+    background:rgba(2,3,10,.55);
+    backdrop-filter:blur(18px);
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.logo{
+    font-size:25px;
+    font-weight:900;
+    letter-spacing:4px;
+}
+
+.logo span{
+    color:#00ffff;
+}
+
+.nav-links{
+    display:flex;
+    gap:32px;
+    list-style:none;
+}
+
+.nav-links a{
+    color:white;
+    text-decoration:none;
+    font-size:12px;
+    letter-spacing:1px;
+    transition:.3s;
+}
+
+.nav-links a:hover{
+    color:#00ffff;
+    text-shadow:0 0 15px #00ffff;
+}
+
+.nav-btn{
+    padding:11px 20px;
+    border:1px solid #00ffff;
+    color:#00ffff;
+    text-decoration:none;
+    font-size:11px;
+    letter-spacing:1px;
+    transition:.3s;
+}
+
+.nav-btn:hover{
+    background:#00ffff;
+    color:#02030a;
+    box-shadow:0 0 25px #00ffff;
+}
+
+/* =====================================================
+   COMMON SECTION
+===================================================== */
+
+section{
+    min-height:100vh;
+    padding:130px 8%;
+    position:relative;
+    display:flex;
+    align-items:center;
+}
+
+.container{
+    width:100%;
+    max-width:1400px;
+    margin:auto;
+}
+
+.label{
+    color:#00ffff;
+    font-size:11px;
+    letter-spacing:5px;
+    margin-bottom:18px;
+}
+
+.title{
+    font-size:clamp(45px,7vw,100px);
+    line-height:.9;
+    letter-spacing:-4px;
+    margin-bottom:30px;
+}
+
+.outline{
+    color:transparent;
+    -webkit-text-stroke:1px #00ffff;
+}
+
+.cyan{
+    color:#00ffff;
+}
+
+.description{
+    max-width:620px;
+    color:#9298aa;
+    line-height:1.9;
+    font-size:16px;
+}
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero{
+    min-height:100vh;
+}
+
+.hero-content{
+    max-width:760px;
+}
+
+.badge{
+    display:inline-block;
+    border:1px solid #00ffff;
+    padding:9px 18px;
+    border-radius:30px;
+
+    color:#00ffff;
+    font-size:10px;
+    letter-spacing:3px;
+
+    margin-bottom:30px;
+
+    box-shadow:
+    0 0 25px rgba(0,255,255,.15);
+}
+
+.hero h1{
+    font-size:clamp(70px,12vw,170px);
+    line-height:.78;
+    letter-spacing:-9px;
+    margin-bottom:40px;
+}
+
+.hero h1 span{
+    color:transparent;
+    -webkit-text-stroke:1px #00ffff;
+}
+
+.hero-buttons{
+    display:flex;
+    gap:15px;
+    margin-top:35px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    padding:16px 30px;
+    text-decoration:none;
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:1px;
+    transition:.35s;
+}
+
+.btn-primary{
+    background:#00ffff;
+    color:#02030a;
+    box-shadow:0 0 30px rgba(0,255,255,.4);
+}
+
+.btn-primary:hover{
+    transform:translateY(-5px);
+    box-shadow:0 0 55px rgba(0,255,255,.8);
+}
+
+.btn-outline{
+    color:white;
+    border:1px solid rgba(255,255,255,.3);
+}
+
+.btn-outline:hover{
+    color:#00ffff;
+    border-color:#00ffff;
+}
+
+/* =====================================================
+   SCROLL TEXT
+===================================================== */
+
+.scroll-text{
+    position:absolute;
+    left:8%;
+    bottom:30px;
+
+    font-size:9px;
+    letter-spacing:4px;
+    color:#777d91;
+
+    writing-mode:vertical-rl;
+}
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+.events-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+}
+
+.card{
+    min-height:300px;
+    padding:35px;
+
+    position:relative;
+
+    background:
+    linear-gradient(
+        145deg,
+        rgba(255,255,255,.08),
+        rgba(255,255,255,.015)
+    );
+
+    border:1px solid rgba(255,255,255,.1);
+
+    backdrop-filter:blur(15px);
+
+    overflow:hidden;
+
+    transition:.5s;
+
+    transform-style:preserve-3d;
+}
+
+.card::before{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+
+    background:#00ffff;
+    filter:blur(100px);
+
+    opacity:0;
+
+    transition:.5s;
+}
+
+.card:hover{
+    transform:
+        perspective(800px)
+        rotateX(5deg)
+        rotateY(-5deg)
+        translateY(-15px);
+
+    border-color:#00ffff;
+
+    box-shadow:
+        0 25px 60px rgba(0,255,255,.15);
+}
+
+.card:hover::before{
+    opacity:.2;
+}
+
+.card-number{
+    font-size:55px;
+    font-weight:900;
+    color:rgba(255,255,255,.08);
+}
+
+.card-icon{
+    font-size:35px;
+    margin:15px 0;
+}
+
+.card h3{
+    font-size:25px;
+    margin-bottom:15px;
+}
+
+.card p{
+    color:#8e94a8;
+    line-height:1.7;
+}
+
+/* =====================================================
+   ABOUT
+===================================================== */
+
+.about-layout{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:80px;
+    align-items:center;
+}
+
+.about-big{
+    font-size:clamp(40px,6vw,80px);
+    line-height:.95;
+}
+
+.about-text{
+    color:#9298aa;
+    line-height:1.9;
+}
+
+.about-text p{
+    margin-bottom:20px;
+}
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-top:50px;
+}
+
+.stat{
+    padding:28px;
+
+    background:rgba(255,255,255,.035);
+
+    border-top:1px solid #00ffff;
+}
+
+.stat h3{
+    font-size:42px;
+}
+
+.stat p{
+    color:#777d91;
+    font-size:12px;
+    margin-top:8px;
+}
+
+/* =====================================================
+   3D EXPERIENCE
+===================================================== */
+
+.experience{
+    justify-content:center;
+    text-align:center;
+}
+
+.experience-content{
+    max-width:850px;
+}
+
+.experience h2{
+    font-size:clamp(50px,8vw,110px);
+    line-height:.85;
+}
+
+.experience p{
+    max-width:650px;
+    margin:30px auto;
+    color:#858b9e;
+    line-height:1.8;
+}
+
+/* =====================================================
+   TIMELINE
+===================================================== */
+
+.timeline{
+    margin-top:60px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+}
+
+.timeline-item{
+    padding:30px;
+    border-left:2px solid #00ffff;
+    background:rgba(255,255,255,.035);
+}
+
+.timeline-item span{
+    color:#00ffff;
+    font-size:11px;
+}
+
+.timeline-item h3{
+    margin:15px 0;
+}
+
+.timeline-item p{
+    color:#777d91;
+    line-height:1.6;
+    font-size:13px;
+}
+
+/* =====================================================
+   COMPETITIONS
+===================================================== */
+
+.competition-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+}
+
+.competition{
+    padding:45px;
+
+    background:
+    linear-gradient(
+        135deg,
+        rgba(0,255,255,.07),
+        rgba(255,255,255,.025)
+    );
+
+    border:1px solid rgba(0,255,255,.15);
+
+    transition:.4s;
+}
+
+.competition:hover{
+    transform:translateY(-10px);
+    box-shadow:0 20px 50px rgba(0,255,255,.12);
+}
+
+.competition h3{
+    font-size:30px;
+    margin:20px 0;
+}
+
+.competition p{
+    color:#858b9e;
+    line-height:1.7;
+}
+
+.tag-list{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:25px;
+}
+
+.tag{
+    padding:7px 12px;
+    border:1px solid rgba(0,255,255,.3);
+    color:#00ffff;
+    font-size:9px;
+}
+
+/* =====================================================
+   CTA
+===================================================== */
+
+.cta{
+    text-align:center;
+    justify-content:center;
+}
+
+.cta h2{
+    font-size:clamp(60px,10vw,150px);
+    line-height:.8;
+    letter-spacing:-7px;
+}
+
+.cta p{
+    color:#888fa1;
+    margin:35px auto;
+    max-width:550px;
+    line-height:1.8;
+}
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer{
+    padding:35px 8%;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+    display:flex;
+    justify-content:space-between;
+
+    color:#62697c;
+    font-size:11px;
+}
+
+footer span{
+    color:#00ffff;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:1000px){
+
+    .nav-links{
+        display:none;
+    }
+
+    .events-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .about-layout{
+        grid-template-columns:1fr;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .timeline{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:650px){
+
+    section{
+        padding:110px 6%;
+    }
+
+    .hero h1{
+        letter-spacing:-5px;
+    }
+
+    .events-grid{
+        grid-template-columns:1fr;
+    }
+
+    .competition-grid{
+        grid-template-columns:1fr;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .timeline{
+        grid-template-columns:1fr;
+    }
+
+    .nav-btn{
+        display:none;
+    }
+
+    footer{
+        flex-direction:column;
+        gap:10px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     3D BACKGROUND
+===================================================== -->
+
+<div id="canvas-container"></div>
+
+<div class="overlay"></div>
+
+<div class="cursor-glow"></div>
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<nav>
+
+<div class="logo">
+TECH<span>FEST</span>
+</div>
+
+<ul class="nav-links">
+
+<li><a href="#home">HOME</a></li>
+<li><a href="#events">EVENTS</a></li>
+<li><a href="#about">ABOUT</a></li>
+<li><a href="#competitions">COMPETE</a></li>
+<li><a href="#experience">EXPERIENCE</a></li>
+
+</ul>
+
+<a href="#register" class="nav-btn">
+REGISTER
+</a>
+
+</nav>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero" id="home">
+
+<div class="container">
+
+<div class="hero-content">
+
+<div class="badge">
+IIT BOMBAY • THE FUTURE OF TECHNOLOGY
+</div>
+
+<h1>
+ENTER<br>
+THE <span>FUTURE</span>
+</h1>
+
+<p class="description">
+
+Welcome to a new dimension of technology.
+
+Techfest brings together brilliant minds,
+innovators, creators, engineers and dreamers
+to experience the technologies shaping tomorrow.
+
+</p>
+
+<div class="hero-buttons">
+
+<a href="#events" class="btn btn-primary">
+EXPLORE TECHFEST
+</a>
+
+<a href="#about" class="btn btn-outline">
+DISCOVER MORE
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="scroll-text">
+SCROLL TO EXPLORE
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     EVENTS
+===================================================== -->
+
+<section id="events">
+
+<div class="container">
+
+<div class="label">
+01 / EVENTS
+</div>
+
+<h2 class="title">
+ENTER THE<br>
+<span class="outline">ARENA</span>
+</h2>
+
+<div class="events-grid">
+
+
+<div class="card">
+
+<div class="card-number">
+01
+</div>
+
+<div class="card-icon">
+🤖
+</div>
+
+<h3>
+ROBOTICS
+</h3>
+
+<p>
+Design autonomous machines, compete in
+robot battles and explore the future of
+human-machine interaction.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-number">
+02
+</div>
+
+<div class="card-icon">
+🧠
+</div>
+
+<h3>
+ARTIFICIAL INTELLIGENCE
+</h3>
+
+<p>
+Build intelligent systems, experiment with
+machine learning and solve real-world
+problems using AI.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-number">
+03
+</div>
+
+<div class="card-icon">
+🔐
+</div>
+
+<h3>
+CYBERSECURITY
+</h3>
+
+<p>
+Enter the digital battlefield and test your
+skills in ethical hacking, security and
+cyber defence.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-number">
+04
+</div>
+
+<div class="card-icon">
+🚀
+</div>
+
+<h3>
+SPACE TECH
+</h3>
+
+<p>
+Explore rockets, satellites, space missions
+and the technologies taking humanity beyond
+Earth.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-number">
+05
+</div>
+
+<div class="card-icon">
+⚡
+</div>
+
+<h3>
+ELECTRONICS
+</h3>
+
+<p>
+Build circuits, experiment with embedded
+systems and create intelligent electronic
+solutions.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-number">
+06
+</div>
+
+<div class="card-icon">
+🌐
+</div>
+
+<h3>
+WEB & SOFTWARE
+</h3>
+
+<p>
+Create futuristic digital products using
+modern web technologies, cloud systems
+and creative interfaces.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     ABOUT
+===================================================== -->
+
+<section id="about">
+
+<div class="container">
+
+<div class="about-layout">
+
+<div>
+
+<div class="label">
+02 / THE VISION
+</div>
+
+<h2 class="about-big">
+TECHNOLOGY
+IS NOT THE
+<span class="cyan">FUTURE.</span>
+</h2>
+
+</div>
+
+<div class="about-text">
+
+<p>
+The future is created by people who are
+willing to experiment, question and build
+something that has never existed before.
+</p>
+
+<p>
+Techfest is a platform where technology
+meets imagination — bringing together
+students, innovators, researchers and
+industry leaders.
+</p>
+
+<p>
+From artificial intelligence to robotics,
+space technology to cybersecurity,
+every experience is designed to push
+the boundaries of possibility.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="stats">
+
+<div class="stat">
+<h3>30+</h3>
+<p>YEARS OF INNOVATION</p>
+</div>
+
+<div class="stat">
+<h3>50K+</h3>
+<p>PARTICIPANTS</p>
+</div>
+
+<div class="stat">
+<h3>100+</h3>
+<p>TECH EVENTS</p>
+</div>
+
+<div class="stat">
+<h3>∞</h3>
+<p>POSSIBILITIES</p>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     EXPERIENCE
+===================================================== -->
+
+<section class="experience" id="experience">
+
+<div class="experience-content">
+
+<div class="label">
+03 / IMMERSIVE EXPERIENCE
+</div>
+
+<h2>
+SEE<br>
+<span class="cyan">BEYOND</span>
+</h2>
+
+<p>
+
+Walk into a world where physical and digital
+experiences collide. Interact with intelligent
+machines, explore futuristic technologies and
+experience innovation from a completely new
+perspective.
+
+</p>
+
+<a href="#competitions" class="btn btn-primary">
+START EXPLORING
+</a>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     TIMELINE
+===================================================== -->
+
+<section>
+
+<div class="container">
+
+<div class="label">
+04 / EXPERIENCE FLOW
+</div>
+
+<h2 class="title">
+YOUR JOURNEY
+</h2>
+
+<div class="timeline">
+
+<div class="timeline-item">
+
+<span>01 — DISCOVER</span>
+
+<h3>
+Explore
+</h3>
+
+<p>
+Discover new technologies, ideas,
+projects and futuristic concepts.
+</p>
+
+</div>
+
+
+<div class="timeline-item">
+
+<span>02 — CONNECT</span>
+
+<h3>
+Meet
+</h3>
+
+<p>
+Connect with creators, engineers,
+researchers and technology enthusiasts.
+</p>
+
+</div>
+
+
+<div class="timeline-item">
+
+<span>03 — COMPETE</span>
+
+<h3>
+Challenge
+</h3>
+
+<p>
+Compete against talented teams and
+solve challenging technical problems.
+</p>
+
+</div>
+
+
+<div class="timeline-item">
+
+<span>04 — CREATE</span>
+
+<h3>
+Build
+</h3>
+
+<p>
+Turn your ideas into prototypes,
+products and experiences.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     COMPETITIONS
+===================================================== -->
+
+<section id="competitions">
+
+<div class="container">
+
+<div class="label">
+05 / COMPETITIONS
+</div>
+
+<h2 class="title">
+BUILD.<br>
+<span class="outline">BREAK.</span><br>
+REINVENT.
+</h2>
+
+<div class="competition-grid">
+
+<div class="competition">
+
+<div class="label">
+01 / ROBOTICS
+</div>
+
+<h3>
+MACHINE ARENA
+</h3>
+
+<p>
+Build powerful autonomous robots and
+compete in a high-energy engineering
+battlefield.
+</p>
+
+<div class="tag-list">
+
+<div class="tag">ROBOTICS</div>
+<div class="tag">ARDUINO</div>
+<div class="tag">AI</div>
+
+</div>
+
+</div>
+
+
+<div class="competition">
+
+<div class="label">
+02 / AI
+</div>
+
+<h3>
+NEURAL HACK
+</h3>
+
+<p>
+Use artificial intelligence to solve
+complex problems and build systems
+that think beyond traditional limits.
+</p>
+
+<div class="tag-list">
+
+<div class="tag">MACHINE LEARNING</div>
+<div class="tag">PYTHON</div>
+<div class="tag">DATA</div>
+
+</div>
+
+</div>
+
+
+<div class="competition">
+
+<div class="label">
+03 / CYBER
+</div>
+
+<h3>
+CYBER RAID
+</h3>
+
+<p>
+Defend digital infrastructure against
+simulated attacks while discovering
+vulnerabilities.
+</p>
+
+<div class="tag-list">
+
+<div class="tag">SECURITY</div>
+<div class="tag">CTF</div>
+<div class="tag">ETHICAL HACKING</div>
+
+</div>
+
+</div>
+
+
+<div class="competition">
+
+<div class="label">
+04 / INNOVATION
+</div>
+
+<h3>
+REALITY FORGE
+</h3>
+
+<p>
+Transform real-world problems into
+innovative prototypes and scalable
+solutions.
+</p>
+
+<div class="tag-list">
+
+<div class="tag">INNOVATION</div>
+<div class="tag">PROTOTYPE</div>
+<div class="tag">STARTUP</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FINAL CTA
+===================================================== -->
+
+<section class="cta" id="register">
+
+<div class="container">
+
+<div class="label">
+06 / YOUR MOVE
+</div>
+
+<h2>
+BUILD<br>
+<span class="cyan">WHAT'S NEXT.</span>
+</h2>
+
+<p>
+
+The future doesn't arrive by itself.
+It is engineered, imagined and built
+by people like you.
+
+</p>
+
+<a href="#home" class="btn btn-primary">
+ENTER TECHFEST
+</a>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+<div>
+TECH<span>FEST</span> 3D EXPERIENCE
+</div>
+
+<div>
+DESIGNED FOR THE <span>FUTURE</span>
+</div>
+
+</footer>
+
+
+<script>
+
+/* =========================================================
+   THREE.JS WORLD
+========================================================= */
+
+const scene = new THREE.Scene();
+
+scene.fog = new THREE.FogExp2(
+    0x02030a,
+    0.018
+);
+
+
+/* CAMERA */
+
+const camera =
+new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth /
+    window.innerHeight,
+    0.1,
+    1000
+);
+
+camera.position.z = 10;
+
+
+/* RENDERER */
+
+const renderer =
+new THREE.WebGLRenderer({
+    antialias:true,
+    alpha:true
+});
+
+renderer.setPixelRatio(
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
+);
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+document
+.getElementById("canvas-container")
+.appendChild(
+    renderer.domElement
+);
+
+
+/* =========================================================
+   LIGHTS
+========================================================= */
+
+const ambient =
+new THREE.AmbientLight(
+    0x446688,
+    2
+);
+
+scene.add(ambient);
+
+
+const cyanLight =
+new THREE.PointLight(
+    0x00ffff,
+    5,
+    40
+);
+
+cyanLight.position.set(
+    5,
+    4,
+    6
+);
+
+scene.add(cyanLight);
+
+
+const blueLight =
+new THREE.PointLight(
+    0x3366ff,
+    3,
+    30
+);
+
+blueLight.position.set(
+    -5,
+    -3,
+    3
+);
+
+scene.add(blueLight);
+
+
+/* =========================================================
+   MAIN ENERGY CORE
+========================================================= */
+
+const coreGeometry =
+new THREE.IcosahedronGeometry(
+    1.6,
+    3
+);
+
+const coreMaterial =
+new THREE.MeshStandardMaterial({
+
+    color:0x00ffff,
+
+    metalness:.9,
+
+    roughness:.12,
+
+    emissive:0x003333
+
+});
+
+const core =
+new THREE.Mesh(
+    coreGeometry,
+    coreMaterial
+);
+
+scene.add(core);
+
+
+/* =========================================================
+   CORE WIREFRAME
+========================================================= */
+
+const wireGeometry =
+new THREE.IcosahedronGeometry(
+    2.1,
+    2
+);
+
+const wireMaterial =
+new THREE.MeshBasicMaterial({
+
+    color:0x00ffff,
+
+    wireframe:true,
+
+    transparent:true,
+
+    opacity:.35
+
+});
+
+const wire =
+new THREE.Mesh(
+    wireGeometry,
+    wireMaterial
+);
+
+scene.add(wire);
+
+
+/* =========================================================
+   ENERGY RINGS
+========================================================= */
+
+const rings=[];
+
+for(let i=0;i<5;i++){
+
+    const ring =
+    new THREE.Mesh(
+
+        new THREE.TorusGeometry(
+            2.5+i*.35,
+            .012,
+            16,
+            100
+        ),
+
+        new THREE.MeshBasicMaterial({
+            color:
+                i%2===0
+                ?0x00ffff
+                :0x3377ff,
+
+            transparent:true,
+
+            opacity:.35
+        })
+
+    );
+
+    ring.rotation.x =
+        Math.random()*Math.PI;
+
+    ring.rotation.y =
+        Math.random()*Math.PI;
+
+    scene.add(ring);
+
+    rings.push(ring);
+}
+
+
+/* =========================================================
+   FLOATING ORBS
+========================================================= */
+
+const orbs=[];
+
+for(let i=0;i<35;i++){
+
+    const size =
+        Math.random()*.07+.025;
+
+    const geometry =
+        new THREE.SphereGeometry(
+            size,
+            12,
+            12
+        );
+
+    const material =
+        new THREE.MeshBasicMaterial({
+            color:
+                i%2
+                ?0x00ffff
+                :0x3366ff
+        });
+
+    const orb =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+    orb.position.set(
+
+        (Math.random()-.5)*18,
+
+        (Math.random()-.5)*14,
+
+        (Math.random()-.5)*15
+
+    );
+
+    scene.add(orb);
+
+    orbs.push(orb);
+
+}
+
+
+/* =========================================================
+   3D CUBES
+========================================================= */
+
+const cubes=[];
+
+for(let i=0;i<20;i++){
+
+    const geometry =
+        new THREE.BoxGeometry(
+            .12,
+            .12,
+            .12
+        );
+
+    const material =
+        new THREE.MeshBasicMaterial({
+            color:0x00ffff
+        });
+
+    const cube =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+    cube.position.set(
+
+        (Math.random()-.5)*20,
+
+        (Math.random()-.5)*15,
+
+        (Math.random()-.5)*18
+
+    );
+
+    scene.add(cube);
+
+    cubes.push(cube);
+
+}
+
+
+/* =========================================================
+   PARTICLE UNIVERSE
+========================================================= */
+
+const particleCount=4000;
+
+const particleGeometry =
+new THREE.BufferGeometry();
+
+const positions =
+new Float32Array(
+    particleCount*3
+);
+
+for(let i=0;i<particleCount*3;i++){
+
+    positions[i] =
+        (Math.random()-.5)*100;
+
+}
+
+particleGeometry.setAttribute(
+
+    "position",
+
+    new THREE.BufferAttribute(
+        positions,
+        3
+    )
+
+);
+
+const particleMaterial =
+new THREE.PointsMaterial({
+
+    color:0x00ffff,
+
+    size:.025,
+
+    transparent:true,
+
+    opacity:.75
+
+});
+
+const particles =
+new THREE.Points(
+    particleGeometry,
+    particleMaterial
+);
+
+scene.add(particles);
+
+
+/* =========================================================
+   GIANT SPACE SPHERE
+========================================================= */
+
+const sphereGeometry =
+new THREE.SphereGeometry(
+    5,
+    32,
+    32
+);
+
+const sphereMaterial =
+new THREE.MeshBasicMaterial({
+
+    color:0x004455,
+
+    wireframe:true,
+
+    transparent:true,
+
+    opacity:.04
+
+});
+
+const giantSphere =
+new THREE.Mesh(
+    sphereGeometry,
+    sphereMaterial
+);
+
+scene.add(giantSphere);
+
+
+/* =========================================================
+   MOUSE INTERACTION
+========================================================= */
+
+let mouseX=0;
+let mouseY=0;
+
+window.addEventListener(
+    "mousemove",
+    event=>{
+
+        mouseX =
+            event.clientX /
+            window.innerWidth * 2 - 1;
+
+        mouseY =
+            event.clientY /
+            window.innerHeight * 2 - 1;
+
+        document
+        .querySelector(".cursor-glow")
+        .style.left =
+            event.clientX+"px";
+
+        document
+        .querySelector(".cursor-glow")
+        .style.top =
+            event.clientY+"px";
+
+    }
+);
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+let scrollProgress=0;
+
+window.addEventListener(
+    "scroll",
+    ()=>{
+
+        const max =
+            document.body.scrollHeight -
+            window.innerHeight;
+
+        scrollProgress =
+            window.scrollY/max;
+
+    }
+);
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+const clock =
+new THREE.Clock();
+
+function animate(){
+
+    requestAnimationFrame(
+        animate
+    );
+
+    const time =
+        clock.getElapsedTime();
+
+
+    /* MAIN CORE */
+
+    core.rotation.x =
+        time*.25;
+
+    core.rotation.y =
+        time*.4;
+
+
+    const pulse =
+        1+
+        Math.sin(time*2)*.06;
+
+    core.scale.set(
+        pulse,
+        pulse,
+        pulse
+    );
+
+
+    /* WIREFRAME */
+
+    wire.rotation.x =
+        -time*.15;
+
+    wire.rotation.y =
+        -time*.25;
+
+
+    /* RINGS */
+
+    rings.forEach(
+        (ring,index)=>{
+
+            ring.rotation.x +=
+                .001+
+                index*.0005;
+
+            ring.rotation.z +=
+                .002+
+                index*.0007;
+
+        }
+    );
+
+
+    /* PARTICLES */
+
+    particles.rotation.y =
+        time*.012;
+
+    particles.rotation.x =
+        time*.004;
+
+
+    /* ORBS */
+
+    orbs.forEach(
+        (orb,index)=>{
+
+            orb.position.y +=
+                Math.sin(
+                    time+
+                    index
+                )*.001;
+
+        }
+    );
+
+
+    /* CUBES */
+
+    cubes.forEach(
+        (cube,index)=>{
+
+            cube.rotation.x =
+                time*(.2+index*.01);
+
+            cube.rotation.y =
+                time*.3;
+
+        }
+    );
+
+
+    /* GIANT SPHERE */
+
+    giantSphere.rotation.y =
+        time*.05;
+
+    giantSphere.rotation.x =
+        time*.02;
+
+
+    /* MOUSE CAMERA */
+
+    camera.position.x +=
+        (
+            mouseX*1.8 -
+            camera.position.x
+        )*.025;
+
+    camera.position.y +=
+        (
+            -mouseY*1.2 -
+            camera.position.y
+        )*.025;
+
+
+    /* SCROLL CAMERA */
+
+    camera.position.z =
+        10 -
+        scrollProgress*3;
+
+    camera.rotation.z =
+        scrollProgress*.08;
+
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+}
+
+animate();
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+window.addEventListener(
+    "resize",
+    ()=>{
+
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
+
+    }
+);
+
+
+/* =========================================================
+   3D CARD TILT
+========================================================= */
+
+document
+.querySelectorAll(".card")
+.forEach(card=>{
+
+    card.addEventListener(
+        "mousemove",
+        event=>{
+
+            const rect =
+                card.getBoundingClientRect();
+
+            const x =
+                event.clientX -
+                rect.left;
+
+            const y =
+                event.clientY -
+                rect.top;
+
+            const rotateY =
+                (x/rect.width-.5)*10;
+
+            const rotateX =
+                -(y/rect.height-.5)*10;
+
+            card.style.transform =
+                `perspective(800px)
+                 rotateX(${rotateX}deg)
+                 rotateY(${rotateY}deg)
+                 translateY(-12px)`;
+
+        }
+    );
+
+
+    card.addEventListener(
+        "mouseleave",
+        ()=>{
+
+            card.style.transform =
+                "";
+
+        }
+    );
+
+});
+
+</script>
+
+</body>
+</html>
